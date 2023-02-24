@@ -1,0 +1,12 @@
+{
+    "accounts": [
+        {
+            "name": "yourname1",
+            "email": "youremail1"
+        },
+        {
+            "name": "yourname2",
+            "email": "youremail2"
+        }
+    ]
+}
