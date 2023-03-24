@@ -29,12 +29,11 @@ async function readFile() {
   });
 }
 
-
 async function main() {
   fileData = await readFile();
   cuentas = fileData.accounts;
 
-  let choices = cuentas.map((cuenta, index) => index + '. ' + cuenta.name);
+  let choices = cuentas.map((cuenta, index) => `${index}. ${cuenta.name} (${cuenta.alias})`);
   choices.push(choices.length + '. cancelar');
 
   console.log('==== gitchoose: Confirgirar credenciales globales de git ====');

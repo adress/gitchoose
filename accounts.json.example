@@ -1,10 +1,12 @@
 {
     "accounts": [
         {
+            "alias": "youralias1",
             "name": "yourname1",
             "email": "youremail1"
         },
         {
+            "alias": "youralias1",
             "name": "yourname2",
             "email": "youremail2"
         }
