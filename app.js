@@ -2,22 +2,34 @@ const inquirer = require('inquirer');
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const fs = require('fs');
+const yargs = require('yargs');
 
 //fields
-let cuentas = {};
+let accountList = {};
 
 
-async function configurarCuenta(cuenta) {
-  await exec(`git config --global user.name "${cuenta.name}"`);
-  await exec(`git config --global user.email "${cuenta.email}"`);
+async function configurarCuenta(account, isGlobal) {
+  if (isGlobal) {
+    await exec(`git config --global user.name "${account.name}"`);
+    await exec(`git config --global user.email "${account.email}"`);
+  } else {
+    await exec(`git config user.name "${account.name}"`);
+    await exec(`git config user.email "${account.email}"`);
+  }
 }
 
-async function printCredenciales() {
-  const { stdout: name } = await exec('git config --global user.name');
-  const { stdout: email } = await exec('git config --global user.email');
-
-  console.log(`usuario: ${name.replace(/(\r\n|\n|\r)/gm, "")}`);
-  console.log(`correo: ${email.replace(/(\r\n|\n|\r)/gm, "")}`);
+async function printCredenciales(isGlobal) {
+  if (isGlobal) {
+    const { stdout: name } = await exec('git config --global user.name');
+    const { stdout: email } = await exec('git config --global user.email');
+    console.log(`usuario: ${name.replace(/(\r\n|\n|\r)/gm, "")}`);
+    console.log(`correo: ${email.replace(/(\r\n|\n|\r)/gm, "")}`);
+  } else {
+    const { stdout: name } = await exec('git config user.name');
+    const { stdout: email } = await exec('git config user.email');
+    console.log(`usuario: ${name.replace(/(\r\n|\n|\r)/gm, "")}`);
+    console.log(`correo: ${email.replace(/(\r\n|\n|\r)/gm, "")}`);
+  }
 }
 
 async function readFile() {
@@ -29,33 +41,48 @@ async function readFile() {
   });
 }
 
-async function main() {
+async function main(isGlobal) {
   fileData = await readFile();
-  cuentas = fileData.accounts;
+  accountList = fileData.accounts;
 
-  let choices = cuentas.map((cuenta, index) => `${index}. ${cuenta.name} (${cuenta.alias})`);
+  let choices = accountList.map((account, index) => `${index}. ${account.name} (${account.alias})`);
   choices.push(choices.length + '. cancelar');
 
-  console.log('==== gitchoose: Confirgirar credenciales globales de git ====');
+  const scopeType = isGlobal ? 'global' : 'local';
+  console.log(`==== gitchoose: Confirgirar credenciales ${scopeType} de git ====`);
   console.log('Credenciales actuales:');
   await printCredenciales();
   inquirer.prompt([
     {
       type: 'list',
       name: 'response',
-      message: 'que cuenta de git quieres usar de manera global?',
+      message: `que cuenta de git quieres usar de manera ${scopeType}?`,
       choices
     },
   ]).then(answers => {
     const index = answers.response.charAt(0);
     if (index == choices.length - 1) { return; }
-    const cuenta = cuentas[index];
-    configurarCuenta(cuenta).then(() => {
-      console.log('==== Nuevas credenciales globales de git ====');
-      printCredenciales();
+    const cuenta = accountList[index];
+    configurarCuenta(cuenta, isGlobal).then(() => {
+      console.log(`==== Nuevas credenciales ${scopeType} de git ====`);
+      printCredenciales(isGlobal);
       setTimeout(() => { }, 2000);
     });
   });
 }
 
-main();
+
+const argv = yargs
+  .option('g', {
+    alias: 'global',
+    describe: 'Configurar credenciales globales de git',
+    type: 'boolean',
+    demandOption: false // no es obligatorio
+  })
+  .help()
+  .argv;
+
+
+console.log(argv.g)
+
+main(argv.g? true : false);

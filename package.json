@@ -3,6 +3,7 @@
     "start": "node app"
   },
   "dependencies": {
-    "inquirer": "^8.2.2"
+    "inquirer": "^8.2.2",
+    "yargs": "^17.7.2"
   }
 }
