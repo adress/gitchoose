@@ -73,16 +73,17 @@ async function main(isGlobal) {
 
 
 const argv = yargs
+  .usage('Uso: $0 [opciones]')
   .option('g', {
     alias: 'global',
     describe: 'Configurar credenciales globales de git',
     type: 'boolean',
     demandOption: false // no es obligatorio
   })
-  .help()
+  .help('h')
+  .alias('h', 'help')
+  .example('$0 -g', 'Configurar credenciales globales de git')
+  .example('$0', 'Configurar credenciales locales de git')
   .argv;
 
-
-console.log(argv.g)
-
-main(argv.g? true : false);
+main(argv.g ? true : false);
